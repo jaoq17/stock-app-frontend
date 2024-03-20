@@ -12,9 +12,7 @@ const App = () => {
   const handleChange = (e) => {
     const fieldValue = e.target.value
     const fieldName = e.target.name
-
     // console.log({ fieldValue, fieldName })
-
     setProduct({...product, [fieldName]: fieldValue })
     // setProduct(name)
   }
@@ -55,7 +53,9 @@ const App = () => {
       })
   }
 
-  console.log({ isLoading })
+  
+
+  // console.log({ isLoading })
 
   return (
     <div className="App">
