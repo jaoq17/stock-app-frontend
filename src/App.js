@@ -1,33 +1,88 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 
-function App() {
-  const [pokemon, setPokemon] = useState({})     // useState tiene un arreglo [], que en su primera posicion tiene un objeto donde se almacena nuestro estado y en la segunda una function que sirve para actualizar nuestro estado
+const initialState = { name: '', price: 0}
 
-  useEffect(() => {
-    const pokeApiBaseUrl = `https://pokeapi.co/api/v2/pokemon`
-    fetch(`${pokeApiBaseUrl}/charmeleon`)
-    .then((res) =>{                             // Aca recibimos la respuesta el 
-        return res.json()                       // convertimos la respues en json, que devuelve una promesa
+const App = () => {
+  const [isLoading , setIsLoading] = useState(false)
+  const [product , setProduct] = useState(initialState)
+
+
+
+  const handleChange = (e) => {
+    const fieldValue = e.target.value
+    const fieldName = e.target.name
+
+    // console.log({ fieldValue, fieldName })
+
+    setProduct({...product, [fieldName]: fieldValue })
+    // setProduct(name)
+  }
+
+  
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!product.name){
+      console.log('Tienes que llenar el campo NOMBRE')
+      return
+    }
+
+
+    setIsLoading(true)
+
+    fetch('http://localhost:5000/api/v1/products', {
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify (product),
     })
-    .then((poke) =>{                         //aca ya recibimos al pokemon 
-      setPokemon(poke)                  // <------------------ Aca llamo a la funcion de arriba de crear pokemones  
-    })
+      .then((res)=> res.json())
+      .then((data) => {
+        if (data.ok) {
+          console.log("Producto creado con éxito!")
+          setProduct(initialState)     // con esta linea de codigo cuadno se crea el producto se reinicializan los campos del input
+          
+        }else{
+          console.log(data.message)
+        }
+        setIsLoading(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        setIsLoading(false)
+      })
+  }
 
-  }, [])
-
-
-console.log({pokemon})
+  console.log({ isLoading })
 
   return (
     <div className="App">
-      <div className='poke-card'>
-        <h3>{ pokemon.name}</h3>
-        <img src={pokemon.sprites?.front_default} alt=''/>
-        <span>#{pokemon.id}</span>
-      </div>
+      <h1>Nuevo producto</h1>
+      <form onSubmit={handleSubmit}>
+        <input 
+          onChange={handleChange}
+          value={product.name}
+          type='text' 
+          name='name' 
+          placeholder='Nombre del producto...'
+        />
+        <input
+          onChange={handleChange}
+          value={product.price}   // las llaves se usan porque estamos usando codigo de javascript
+          type='number' 
+          name='price' 
+          placeholder='Precio del producto...' 
+        />
+        <button>
+          {
+            isLoading ? 'Creando producto...' : 'Crear producto'
+          }
+        </button>
+      </form>
     </div>
-  )
+  );
 }
 
 export default App;
